@@ -25,6 +25,20 @@ data_dirs = "data/"
 
 
 class Crawler:
+    """
+        A class to crawl data from an API and save it to a CSV file.
+
+        Attributes:
+        ----------
+        no_of_row : int
+            The number of rows to fetch from the API.
+        live : bool
+            Indicates whether to fetch live data or historical data.
+        historical : str
+            The date for historical data retrieval, if applicable.
+        api_key : str
+            The API key used to access the data source.
+        """
 
     def __init__(self, no_of_row: int, live: bool, historical: str):
         print("--------INITIALIZING CRAWLER---------")
@@ -49,6 +63,22 @@ class Crawler:
         dic[key] = value
 
     def get_concurrency_data(self, endpoint_ver: str, headers, params):
+        """
+                Retrieves data from the API using concurrency based on the specified endpoint version.
+
+                Parameters:
+                ----------
+                endpoint_ver : str
+                    The version of the API endpoint to query.
+                headers : dict
+                    The headers to include in the API request.
+                params : dict
+                    The parameters to include in the API request.
+
+                Returns:
+                -------
+                None
+                """
         endpoint_path = ''
         if self.historical == 'latest':
             endpoint_path = endpoint_paths[0]
@@ -63,11 +93,23 @@ class Crawler:
         if status_code == 200:
             data = data['data']
             self.to_csv(data)
-            execute_time = timeit.timeit(lambda: self.to_csv(data), number=number_of_repeat) / number_of_repeat
-            print(f"Average time for writing {self.no_of_row} records for {number_of_repeat} times is {execute_time}")
+            # execute_time = timeit.timeit(lambda: self.to_csv(data), number=number_of_repeat) / number_of_repeat
+            # print(f"Average time for writing {self.no_of_row} records for {number_of_repeat} times is {execute_time}")
         return
 
     def to_csv(self, data):
+        """
+                Converts the retrieved data into a CSV file.
+
+                Parameters:
+                ----------
+                data : dict
+                    The data to be converted into a DataFrame and saved as a CSV file.
+
+                Returns:
+                -------
+                None
+                """
         df = pd.DataFrame.from_dict(data)
         quotes_df = pd.json_normalize(df['quote'])
         df = pd.concat([df[['cmc_rank', 'name', 'symbol', 'circulating_supply']],
@@ -84,6 +126,23 @@ class Crawler:
 
     @staticmethod
     def do_concurrency_request(endpoint: str, headers, params):
+        """
+                Makes an asynchronous API request to the specified endpoint.
+
+                Parameters:
+                ----------
+                endpoint : str
+                    The API endpoint to request data from.
+                headers : dict
+                    The headers to include in the API request.
+                params : dict
+                    The parameters to include in the API request.
+
+                Returns:
+                -------
+                tuple
+                    A tuple containing the status code and the response data.
+                """
         async def concurrency_api_session():
             async with aiohttp.ClientSession() as session:
                 async with session.get(cmc_api + '/' + endpoint, headers=headers, params=params) as response:

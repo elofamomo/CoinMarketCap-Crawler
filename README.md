@@ -53,7 +53,7 @@ Data field queried
 
 ### Performance
 
-Uncomment the below code in line 66,67 in `crawler.py`
+Uncomment the below code in line 96,97 in `crawler.py`
 ```python
 execute_time = timeit.timeit(lambda: self.to_csv(data), number=number_of_repeat) / number_of_repeat
 print(f"Average time for writing {self.no_of_row} records is {execute_time}")
